@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Title</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/moralis/dist/moralis.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <div class="jumbotron jumbotron-fluid">
+      <div class="container">
+        <h1 class="display-4">Welcome</h1>
+      </div>
+    </div>
+    <div class="container">
+        <button id="btn-login">Sign in with MetaMask</button>
+        <button id="btn-logout">Log Out with MetaMask</button>
+        <button id="btn-tx">Get Tx</button>
+    </div>
+    <div id="tx-chart">
+
+    </div>
+
+    <script>
+        // connect to Moralis server
+        Moralis.initialize("zbtJuYFKnMY021udihadBrPWMESG2uEKtI4areql"); // Application id from moralis.io
+        Moralis.serverURL = "https://nouhprmelkna.moralishost.com:2053/server"; //Server url from moralis.io
+        
+
+        // add from here down
+        async function login() {
+          let user = Moralis.User.current();
+          if (!user) {
+            user = await Moralis.authenticate();
+          }
+          console.log("logged in user:", user);
+        }
+  
+        async function logOut() {
+          await Moralis.User.logOut();
+          console.log("logged out");
+        }
+
+        async function transactions(){
+        // get mainnet transactions for the current user
+        const transactions = await Moralis.Web3API.account.getTransactions();
+        createTable(transactions.result, "ETH")
+
+        const transactionsbsc = await Moralis.Web3API.account.getTransactions({chain: "bsc"});
+        createTable(transactionsbsc.result, 'BSC')
+        }
+        
+        function createTable(myArray, chain) {
+            var result = "<table border=1><th>"+chain+"</th>";
+                for(var i=0; i<myArray.length; i++) {
+                    result += "<tr>";
+                    result += "<td>"+myArray[i]["hash"]+"</td>";
+                    result += "</tr>";
+                }
+                result += "</table>";
+                
+                //document.write(result);
+                document.getElementById("tx-chart").innerHTML += result 
+          
+          }
+
+        document.getElementById("btn-login").onclick = login;
+        document.getElementById("btn-logout").onclick = logOut;
+        document.getElementById("btn-tx").onclick = transactions;
+
+      </script>
+</html>
